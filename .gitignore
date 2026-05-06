@@ -1,0 +1,46 @@
+# =========================
+# Output generati
+# =========================
+docs/output/*.pdf
+docs/output/*.docx
+docs/output/*.html
+docs/output/*.epub
+
+# File temporanei
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# Log
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# JetBrains
+.idea/
+
+# Python cache (se userai script Python)
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.venv/
+
+# Pandoc / LaTeX temp
+*.aux
+*.toc
+*.out
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
