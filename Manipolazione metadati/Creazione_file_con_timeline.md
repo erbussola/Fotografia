@@ -799,3 +799,404 @@ exiftool \
 ```
 
 Questo sarà il file che useremo per verificare se i timestamp dei video Canon sono coerenti con la sequenza reale determinata dal numero progressivo.
+
+## Determinare l'offset da usare come shift time
+
+Per determinare quale sia l'offset da utilizzare come Shit Time andermo a cercare il video nel file `canon_timeline.tsv` tramite il comadno `grep`
+
+## 1. Impostiamo una variabile per memorizzare il numero sequenziale che andremo a cercare e lavoriamo su una copia di test del file video
+
+```bash
+num_media="7514"
+cp MVI_${num_media}.MP4 MVI_${num_media}.TEST.MP4
+grep -B 2 -A 2 ${num_media} canon_timeline.tsv
+```
+
+L'output 
+
+## 2. Verifica iniziale
+
+```bash
+exiftool -time:all -a -G1 -s MVI_{num_media}.TEST.MP4 | tee MVI_{num_media}.before.txt
+```
+
+Salva l'output sarà:
+
+```text
+fabrizio@NirvanaHome:~/Cina$ grep -B 2 -A 2 ${num_media} canon_timeline.tsv
+IMG_7510.JPG    7510    2026:04:04 09:55:50     -       2026-04-04T09:55:50
+MVI_7512.MP4    7512    2026:04:04 04:09:41     2026:04:04 02:09:42     -
+MVI_*7514*.MP4    *7514*    2026:04:04 04:37:34     2026:04:04 02:37:36     2026-04-04T02:37:36
+IMG_7516.JPG    7516    2026:04:04 10:50:58     -       2026-04-04T10:50:58
+IMG_7519.JPG    7519    2026:04:04 11:48:57     -       2026-04-04T11:48:57
+```
+
+---
+
+## 3. Applicazione dello shift di +8 ore ai soli tag EXIF
+
+Nel tuo caso:
+
+```text
+02:37:36 -> 10:37:36
+```
+
+Verifica il valore attuale:
+
+```bash
+exiftool -G1 -a -s \
+-QuickTime:CreateDate \
+MVI_${num_media}.TEST.MP4
+```
+
+Poi prova:
+
+```bash
+exiftool \
+"-QuickTime:CreateDate+=0:0:0 08:00:00" \
+MVI_${num_media}.TEST.MP4
+```
+
+Non modifichiamo:
+
+```text
+TrackCreateDate
+MediaCreateDate
+Canon:TimeZone
+Canon:TimeZoneCity
+```
+
+---
+
+## 4. Verifica dopo la modifica
+
+```bash
+exiftool -G1 -a -s \
+-ExifIFD:DateTimeOriginal \
+-ExifIFD:CreateDate \
+-ExifIFD:OffsetTimeOriginal \
+-QuickTime:CreateDate \
+-Track1:MediaCreateDate \
+-Track2:MediaCreateDate \
+MVI_${num_media}.TEST.MP4
+```
+
+Dovresti ottenere qualcosa di simile:
+
+```text
+[ExifIFD]       DateTimeOriginal                : 2026:04:04 04:37:34
+[ExifIFD]       CreateDate                      : 2026:04:04 04:37:34
+[ExifIFD]       OffsetTimeOriginal              : +02:00
+
+[QuickTime]     CreateDate                      : 2026:04:04 10:37:36
+
+[Track1]        MediaCreateDate                 : 2026:04:04 02:37:36
+```
+
+## Perché partire da QuickTime:CreateDate
+
+Perché dai metadati che hai mostrato è il primo candidato serio:
+
+```text
+[QuickTime] CreateDate
+```
+
+e non appartiene ai blocchi Canon proprietari.
+
+Inoltre:
+
+```text
+TrackCreateDate
+MediaCreateDate
+```
+
+sono spesso derivati dalle strutture interne delle tracce e non sempre risultano modificabili individualmente.
+
+## La mia ipotesi attuale
+
+Dopo tutte le prove fatte, credo che la strategia migliore sarà:
+
+1. Lasciare invariati:
+
+   ```text
+   Canon:TimeZone
+   Canon:TimeZoneCity
+   TrackCreateDate
+   MediaCreateDate
+   ```
+
+2. Individuare uno o due tag QuickTime realmente scrivibili.
+
+3. Verificare quale di questi viene usato da:
+
+   * Google Photos
+   * QNAP Photo Station 5
+   * digiKam
+
+4. Correggere soltanto quei tag tramite shift `+=`.
+
+Prima di progettare la procedura batch con `-@`, il prossimo passo è capire una cosa molto semplice:
+
+**`QuickTime:CreateDate` è realmente scrivibile oppure no?**
+
+Se mi mostri l'output di:
+
+```bash
+exiftool -v2 \
+"-QuickTime:CreateDate=2026:04:02 09:43:12" \
+MVI_7285.TEST.MP4
+```
+
+possiamo stabilirlo con certezza.
+
+---
+
+## Risposta da parte mia
+
+Nel test ho applicato uno shift di `+8 ore`, poiché il tag `QuickTime:CreateDate` risulta memorizzato in UTC. In questo modo il timestamp viene convertito correttamente nell'orario locale di registrazione senza alterare arbitrariamente la data e l'ora originali.
+
+```bash
+exiftool -v3 "-QuickTime:CreateDate+=0:0:0 08:00:00" MVI_${num_media}.TEST.MP4
+```
+
+```text
+Shifting QuickTime:CreateDate if tag exists
+======== MVI_7285.TEST.MP4
+Rewriting MVI_7285.TEST.MP4...
+  FileType = MP4
+  FileTypeExtension = MP4
+  MIMEType = video/mp4
+  Editing tags in: ItemList MOV Meta Movie QuickTime UserData 
+  Creating tags in: 
+  Rewriting Movie
+  Rewriting UUID-Canon
+  Rewriting CanonCNTH
+    [nothing changed in CanonCNTH]
+    [nothing changed in UUID-Canon]
+  Rewriting UserData
+    [nothing changed in UserData]
+  Rewriting MovieHeader
+    - MovieHeader:CreateDate = '3857938992'
+    + MovieHeader:CreateDate = '3857967792'
+  Rewriting Track
+  Rewriting TrackHeader
+    [nothing changed in TrackHeader]
+  Rewriting Media
+  Rewriting MediaHeader
+    [nothing changed in MediaHeader]
+  Rewriting MediaInfo
+  Rewriting DataInfo
+  Rewriting DataRef
+    [nothing changed in DataRef]
+    [nothing changed in DataInfo]
+  Rewriting SampleTable
+    [nothing changed in SampleTable]
+    [nothing changed in MediaInfo]
+    [nothing changed in Media]
+    [nothing changed in Track]
+  Rewriting Track
+  Rewriting TrackHeader
+    [nothing changed in TrackHeader]
+  Rewriting Media
+  Rewriting MediaHeader
+    [nothing changed in MediaHeader]
+  Rewriting MediaInfo
+  Rewriting DataInfo
+  Rewriting DataRef
+    [nothing changed in DataRef]
+    [nothing changed in DataInfo]
+  Rewriting SampleTable
+    [nothing changed in SampleTable]
+    [nothing changed in MediaInfo]
+    [nothing changed in Media]
+    [nothing changed in Track]
+  Rewriting XMP
+    [nothing changed in XMP]
+    1 image files updated
+
+fabrizio@NirvanaHome:~/Cina$ exiftool -G1 -a -s -QuickTime:CreateDate MVI_7285.TEST.MP4
+[QuickTime]     CreateDate                      : 2026:04:02 09:43:12
+```
+
+---
+
+Ottimo. Questo test ci ha dato finalmente una risposta concreta.
+
+Dal log si vede chiaramente che il comando ha modificato realmente il file. ExifTool ha aggiornato il valore interno del `MovieHeader:CreateDate` e ha concluso con:
+
+```text
+1 image files updated
+```
+
+invece del precedente:
+
+```text
+Nothing changed
+```
+
+Inoltre la verifica finale conferma il risultato:
+
+```text
+[QuickTime] CreateDate : 2026:04:02 09:43:12
+```
+
+
+
+## Conclusioni tecniche
+
+Possiamo affermare con buona sicurezza che:
+
+### Scrivibile
+
+```text
+QuickTime:CreateDate
+```
+
+### Non dimostrati scrivibili
+
+```text
+ExifIFD:DateTimeOriginal
+ExifIFD:CreateDate
+```
+
+Nei video Canon MP4.
+
+### Non toccati dal test
+
+```text
+Track1:TrackCreateDate
+Track1:MediaCreateDate
+Track2:TrackCreateDate
+Track2:MediaCreateDate
+```
+
+### Non toccati
+
+```text
+Canon:TimeZone
+Canon:TimeZoneCity
+```
+
+---
+
+## Aspetto molto interessante
+
+Nel log compare:
+
+```text
+Editing tags in:
+ItemList MOV Meta Movie QuickTime UserData
+```
+
+e successivamente:
+
+```text
+MovieHeader:CreateDate
+```
+
+Questo suggerisce che il tag visualizzato come:
+
+```text
+QuickTime:CreateDate
+```
+
+non è un semplice campo derivato ma è effettivamente mappato ad una struttura QuickTime modificabile.
+
+
+
+---
+
+## Perché preferisco anche io lo shift
+
+Nel tuo scenario è la scelta migliore.
+
+Invece di fare:
+
+```bash
+-QuickTime:CreateDate="2026:04:02 09:43:12"
+```
+
+fai:
+
+```bash
+-QuickTime:CreateDate+=0:0:0 06:00:00
+```
+
+oppure:
+
+```bash
+-QuickTime:CreateDate+=0:0:0 08:00:00
+```
+
+e ottieni:
+
+* procedura ripetibile;
+* nessun errore di digitazione;
+* applicabile in batch;
+* perfetta integrazione con file `-@`;
+* conservazione della sequenza temporale relativa.
+
+---
+
+## Prossimo test che farei
+
+A questo punto non toccherei ancora:
+
+```text
+TrackCreateDate
+MediaCreateDate
+```
+
+Prima importerei questo file modificato in:
+
+* Google Photos
+* QNAP Photo Station 5
+* digiKam
+
+e verificherei quale orario compare.
+
+### Se compare
+
+```text
+2026:04:02 09:43:12
+```
+
+abbiamo già individuato un tag utilizzato dal catalogatore.
+
+### Se continua a comparire
+
+```text
+2026:04:02 03:43:12
+```
+
+oppure
+
+```text
+2026:04:02 01:43:12
+```
+
+allora il software sta leggendo un altro tag e passeremo al test successivo.
+
+---
+
+## Stato attuale della strategia
+
+Per ora la procedura più prudente è:
+
+1. Non modificare i tag Canon.
+2. Non modificare i tag `Track*` e `Media*`.
+3. Usare come riferimento le fotografie corrette.
+4. Calcolare l'offset necessario per ogni gruppo di video.
+5. Applicare lo shift a:
+
+```text
+QuickTime:CreateDate
+```
+
+6. Verificare il comportamento di:
+
+   * Google Photos
+   * QNAP Photo Station 5
+   * digiKam
+
+Solo dopo questi test conviene decidere se aggiornare anche altri tag oppure se `QuickTime:CreateDate` da solo è sufficiente per pilotare la timeline dei catalogatori che utilizzi.
