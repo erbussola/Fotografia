@@ -812,15 +812,7 @@ cp MVI_${num_media}.MP4 MVI_${num_media}.TEST.MP4
 grep -B 2 -A 2 ${num_media} canon_timeline.tsv
 ```
 
-L'output 
-
-## 2. Verifica iniziale
-
-```bash
-exiftool -time:all -a -G1 -s MVI_{num_media}.TEST.MP4 | tee MVI_{num_media}.before.txt
-```
-
-Salva l'output sarà:
+L'output sarà:
 
 ```text
 fabrizio@NirvanaHome:~/Cina$ grep -B 2 -A 2 ${num_media} canon_timeline.tsv
@@ -829,6 +821,41 @@ MVI_7512.MP4    7512    2026:04:04 04:09:41     2026:04:04 02:09:42     -
 MVI_*7514*.MP4    *7514*    2026:04:04 04:37:34     2026:04:04 02:37:36     2026-04-04T02:37:36
 IMG_7516.JPG    7516    2026:04:04 10:50:58     -       2026-04-04T10:50:58
 IMG_7519.JPG    7519    2026:04:04 11:48:57     -       2026-04-04T11:48:57
+```
+
+## 2. Verifica iniziale
+
+```bash
+exiftool -time:all -a -G1 -s MVI_{num_media}.TEST.MP4 | tee MVI_{num_media}.before.txt
+```
+
+L'output sarà:
+
+```text
+[System]        FileModifyDate                  : 2026:06:06 18:35:08+02:00
+[System]        FileAccessDate                  : 2026:06:06 18:35:12+02:00
+[System]        FileInodeChangeDate             : 2026:06:06 18:35:08+02:00
+[IFD0]          ModifyDate                      : 2026:04:04 04:37:34
+[ExifIFD]       DateTimeOriginal                : 2026:04:04 04:37:34
+[ExifIFD]       CreateDate                      : 2026:04:04 04:37:34
+[ExifIFD]       OffsetTime                      : +02:00
+[ExifIFD]       OffsetTimeOriginal              : +02:00
+[ExifIFD]       OffsetTimeDigitized             : +02:00
+[Canon]         TimeZone                        : +02:00
+[Canon]         TimeZoneCity                    : Paris
+[Canon]         DaylightSavings                 : On
+[ExifIFD]       SubSecTime                      : 85
+[ExifIFD]       SubSecTimeOriginal              : 85
+[ExifIFD]       SubSecTimeDigitized             : 85
+[QuickTime]     CreateDate                      : 2026:04:04 02:37:36
+[QuickTime]     ModifyDate                      : 2026:04:04 02:37:36
+[Track1]        TrackCreateDate                 : 2026:04:04 02:37:36
+[Track1]        TrackModifyDate                 : 2026:04:04 02:37:36
+[Track1]        MediaCreateDate                 : 2026:04:04 02:37:36
+[Track1]        MediaModifyDate                 : 2026:04:04 02:37:36
+[Composite]     SubSecCreateDate                : 2026:04:04 04:37:34.85+02:00
+[Composite]     SubSecDateTimeOriginal          : 2026:04:04 04:37:34.85+02:00
+[Composite]     SubSecModifyDate                : 2026:04:04 04:37:34.85+02:00
 ```
 
 ---
@@ -942,9 +969,9 @@ Prima di progettare la procedura batch con `-@`, il prossimo passo è capire una
 Se mi mostri l'output di:
 
 ```bash
-exiftool -v2 \
-"-QuickTime:CreateDate=2026:04:02 09:43:12" \
-MVI_7285.TEST.MP4
+exiftool \
+"-QuickTime:CreateDate+=0:0:0 08:00:00" \
+MVI_${num_media}.TEST.MP4
 ```
 
 possiamo stabilirlo con certezza.
