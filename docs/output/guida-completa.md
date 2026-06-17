@@ -225,10 +225,8 @@ exiftool -r -ext jpg -ext mp4 \
 ### Ordinamento CSV per progressivo
 
 ```bash
-awk -F',' 'NR>1 {
-match($1, /_([0-9]+)\./, a);
-print a[1] "," $0
-}' report_canon.csv | sort -n | cut -d',' -f2- > report_sorted.csv
+awk -F',' 'NR>1 {match($1, /_([0-9]+)\./, a); print a[1] "," $0}' \
+report_canon.csv | sort -n | cut -d',' -f2- > report_sorted.csv
 ```
 
 ---
