@@ -78,7 +78,7 @@ Restava da normalizzare:
 
 ### Funzionante
 
-#### Foto Canon
+#### Foto Canon (stato attuale)
 
 Corretti:
 
@@ -90,7 +90,7 @@ Corretti:
 
 Timezone Canon MakerNotes ignorato.
 
-#### Video Canon
+#### Video Canon (stato attuale)
 
 Creato correttamente:
 
@@ -100,7 +100,7 @@ XMP-xmp:CreateDate
 
 con logica specifica per gruppo timezone.
 
-#### Foto Android
+#### Foto Android (stato attuale)
 
 Verificato:
 
@@ -110,7 +110,7 @@ ExifIFD:DateTimeOriginal
 
 corretto.
 
-#### Video Android
+#### Video Android (stato attuale)
 
 Verificato:
 
@@ -122,7 +122,7 @@ salvato in UTC.
 
 ### Non funzionante / Incompleto
 
-#### Video Canon
+#### Video Canon (problemi di scrittura)
 
 Non scrivibili:
 
@@ -148,7 +148,7 @@ Canon:DaylightSavings
 
 ## 4. Decisioni Tecniche
 
-### Foto Canon
+### Foto Canon - decisione
 
 Utilizzare:
 
@@ -158,7 +158,7 @@ ExifIFD:DateTimeOriginal
 
 come sorgente.
 
-### Video Canon
+### Video Canon - decisione
 
 Suddivisione in gruppi:
 
@@ -169,7 +169,7 @@ Suddivisione in gruppi:
 | UTC+6  | DateTimeOriginal             |
 | UTC+8  | DateTimeOriginal             |
 
-### Foto Android
+### Foto Android - decisione
 
 Utilizzare:
 
@@ -177,7 +177,7 @@ Utilizzare:
 ExifIFD:DateTimeOriginal
 ```
 
-### Video Android
+### Video Android - decisione
 
 Utilizzare:
 
@@ -554,7 +554,7 @@ exiftool \
 
 ---
 
-### Foto Canon
+### Foto Canon - XMP-xmp:CreateDate
 
 File elencati in:
 
@@ -574,7 +574,7 @@ exiftool \
 
 ---
 
-### Foto Android
+### Foto Android - XMP-xmp:CreateDate
 
 File elencati in:
 
@@ -594,7 +594,7 @@ exiftool \
 
 ---
 
-### Video Android
+### Video Android - XMP-xmp:CreateDate
 
 File elencati in:
 

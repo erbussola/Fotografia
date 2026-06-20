@@ -1067,7 +1067,7 @@ Inoltre la verifica finale conferma il risultato:
 [QuickTime] CreateDate : 2026:04:02 09:43:12
 ```
 
-
+---
 
 ## Conclusioni tecniche
 
@@ -1128,8 +1128,6 @@ QuickTime:CreateDate
 ```
 
 non è un semplice campo derivato ma è effettivamente mappato ad una struttura QuickTime modificabile.
-
-
 
 ---
 
@@ -1216,9 +1214,9 @@ Per ora la procedura più prudente è:
 4. Calcolare l'offset necessario per ogni gruppo di video.
 5. Applicare lo shift a:
 
-```text
-QuickTime:CreateDate
-```
+    ```text
+    QuickTime:CreateDate
+    ```
 
 6. Verificare il comportamento di:
 
