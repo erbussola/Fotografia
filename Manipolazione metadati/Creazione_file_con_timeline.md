@@ -23,7 +23,7 @@ Puoi fornirmi i comandi più rapidi ed efficienti per generare questi file lista
 
 ---
 
-# Risposta GPT
+## Risposta GPT
 
 Penso che l'idea sia ottima.
 
@@ -665,7 +665,7 @@ exiftool \
 
 Quindi non farei alcun backup preventivo.
 
-## 1. Test finale su un singolo file
+### 1. Test finale su un singolo file
 
 Foto:
 
@@ -705,7 +705,7 @@ MVI_7841.MP4
 
 ---
 
-## 2. Aggiornamento massivo
+### 2. Aggiornamento massivo
 
 Per evitare che eventuali warning minori interrompano o sporchino l'output, puoi usare:
 
@@ -733,7 +733,7 @@ M video files updated
 
 ---
 
-## 3. Verifica a campione
+### 3. Verifica a campione
 
 Foto:
 
@@ -765,7 +765,7 @@ Identifier : 7841
 
 ---
 
-## 4. Verifica globale
+### 4. Verifica globale
 
 Per controllare che tutti i file Canon abbiano ricevuto il campo:
 
@@ -781,7 +781,7 @@ Se il comando non produce output, significa che tutti i file hanno correttamente
 
 ---
 
-## 5. Preparazione della timeline Canon
+### 5. Preparazione della timeline Canon
 
 Una volta completato l'aggiornamento, genererei subito un report di lavoro:
 
@@ -804,7 +804,7 @@ Questo sarà il file che useremo per verificare se i timestamp dei video Canon s
 
 Per determinare quale sia l'offset da utilizzare come Shit Time andermo a cercare il video nel file `canon_timeline.tsv` tramite il comadno `grep`
 
-## 1. Impostiamo una variabile per memorizzare il numero sequenziale che andremo a cercare e lavoriamo su una copia di test del file video
+### 1. Impostiamo una variabile per memorizzare il numero sequenziale che andremo a cercare e lavoriamo su una copia di test del file video
 
 ```bash
 num_media="7514"
@@ -823,7 +823,7 @@ IMG_7516.JPG    7516    2026:04:04 10:50:58     -       2026-04-04T10:50:58
 IMG_7519.JPG    7519    2026:04:04 11:48:57     -       2026-04-04T11:48:57
 ```
 
-## 2. Verifica iniziale
+### 2. Verifica iniziale
 
 ```bash
 exiftool -time:all -a -G1 -s MVI_{num_media}.TEST.MP4 | tee MVI_{num_media}.before.txt
@@ -860,7 +860,7 @@ L'output sarà:
 
 ---
 
-## 3. Applicazione dello shift di +8 ore ai soli tag EXIF
+### 3. Applicazione dello shift di +8 ore ai soli tag EXIF
 
 Nel tuo caso:
 
@@ -895,7 +895,7 @@ Canon:TimeZoneCity
 
 ---
 
-## 4. Verifica dopo la modifica
+### 4. Verifica dopo la modifica
 
 ```bash
 exiftool -G1 -a -s \
